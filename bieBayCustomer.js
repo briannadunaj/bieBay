@@ -4,6 +4,7 @@ var inquirer = require("inquirer");
 var userID = [];
 var userUnits = [];
 var currentUnits = [];
+var unitPrice = [];
 
 var connection = mysql.createConnection({
 	host: "localhost",
@@ -31,9 +32,9 @@ var getId = function(){
 				if (err) {
 					console.log("Select product ID error");
 				} else {
-
 					currentUnits.push(results[0].stock_quantity);
-					console.log("Item ID #" + ID + " is " + results[0].product_name + ". There are " + currentUnits + " left in stock.");
+					unitPrice.push(results[0].price);
+					console.log("Item ID #" + ID + " is " + results[0].product_name + "\nIt costs $" + unitPrice + "." + "\nThere are " + currentUnits + " units left in stock.");
 					userID.push(ID);
 					getUnits();
 				}
@@ -54,13 +55,12 @@ var getUnits = function(){
 			if (err) {
 				console.log("Select product units error");
 			}
-
-			console.log("You would like " + units + " units");
-
+			//console.log("You would like " + units + " units");
 			if (units < results[0].stock_quantity){
-				console.log("OK");
+				//console.log("OK");
 				userUnits.push(units);
 				updateQuantity();
+				totalPrice();
 			} else {
 				console.log("Not enough in stock.");
 			}
@@ -71,5 +71,10 @@ var getUnits = function(){
 
 var updateQuantity = function(){
 	var newQuantity = currentUnits - userUnits;
-	console.log("units left: " + newQuantity);
+	console.log("There are now " + newQuantity + " units left.");
+}
+
+var totalPrice = function(){
+	userPrice = unitPrice * userUnits;
+	console.log("Your total price is $" + userPrice);
 }

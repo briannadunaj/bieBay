@@ -2,6 +2,8 @@ var mysql = require("mysql");
 var inquirer = require("inquirer");
 
 var userID = [];
+var userUnits = [];
+var currentUnits = [];
 
 var connection = mysql.createConnection({
 	host: "localhost",
@@ -29,7 +31,9 @@ var getId = function(){
 				if (err) {
 					console.log("Select product ID error");
 				} else {
-					console.log("Item ID #" + ID + " is " + results[0].product_name);
+
+					currentUnits.push(results[0].stock_quantity);
+					console.log("Item ID #" + ID + " is " + results[0].product_name + ". There are " + currentUnits + " left in stock.");
 					userID.push(ID);
 					getUnits();
 				}
@@ -51,13 +55,21 @@ var getUnits = function(){
 				console.log("Select product units error");
 			}
 
-			console.log("You want " + units + " units");
-			
+			console.log("You would like " + units + " units");
+
 			if (units < results[0].stock_quantity){
 				console.log("OK");
+				userUnits.push(units);
+				updateQuantity();
 			} else {
 				console.log("Not enough in stock.");
 			}
 		}) // end of connection.query
 	}) //end of product units question
 } // end of getUnits function
+
+
+var updateQuantity = function(){
+	var newQuantity = currentUnits - userUnits;
+	console.log("units left: " + newQuantity);
+}

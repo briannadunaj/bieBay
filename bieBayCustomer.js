@@ -1,6 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
+var userID = [];
+
 var connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
@@ -10,30 +12,52 @@ var connection = mysql.createConnection({
 });
 
 connection.connect(function(err){
-	console.log("Connected as id: " +connection.threadId);
-	start();
+	console.log("Connected as id: " + connection.threadId);
+	getId();
 });
 
-var start = function(){
-
+var getId = function(){
 
 		inquirer.prompt({
 			name: "productId",
 			type: "input",
 			message: "What is the ID of the product you would like to buy?"
 		}).then(function(answer){
-			var userId = answer.productId;
+			var ID = answer.productId;
 			
-			connection.query("SELECT `item_id`, `product_name`, `price`, `stock_quantity` FROM `products` WHERE `item_id` = ?", [userId], function(err, results){
+			connection.query("SELECT `item_id`, `product_name`, `price`, `stock_quantity` FROM `products` WHERE `item_id` = ?", [ID], function(err, results){
 				if (err) {
-					console.log("select products error");
+					console.log("Select product ID error");
 				} else {
-					console.log("Item ID #" + userId + " is " + results[0].product_name);
+					console.log("Item ID #" + ID + " is " + results[0].product_name);
+					userID.push(ID);
+					getUnits();
 				}
 
 			}) // end of connection.query
 		}); // end of product ID question
+} // end of getId function
 
+var getUnits = function(){
+	inquirer.prompt({
+		name: "productUnits",
+		type: "input",
+		message: "How many units would you like to purchase?"
+	}).then(function(answer){
+		var units = answer.productUnits;
 
-} // end of start function
+		connection.query("SELECT `item_id`, `product_name`, `price`, `stock_quantity` FROM `products` WHERE `item_id` = ?", [userID], function(err, results){
+			if (err) {
+				console.log("Select product units error");
+			}
 
+			console.log("You want " + units + " units");
+			
+			if (units < results[0].stock_quantity){
+				console.log("OK");
+			} else {
+				console.log("Not enough in stock.");
+			}
+		}) // end of connection.query
+	}) //end of product units question
+} // end of getUnits function
